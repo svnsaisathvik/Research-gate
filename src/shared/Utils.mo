@@ -10,57 +10,61 @@ import Char "mo:base/Char";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
+import Debug "mo:base/Debug";
+import Nat "mo:base/Nat";
+import Int "mo:base/Int";
+import Float "mo:base/Float";
+import Bool "mo:base/Bool";
 
-module Utils {
 
     // Text utilities
-    public func toLowerCase(text: Text) : Text {
-        Text.map(text, Prim.charToLower)
+    func toLowerCase(text: Text) : Text {
+        Text.toLowercase(text)
     };
 
-    public func toUpperCase(text: Text) : Text {
-        Text.map(text, Prim.charToUpper)
+    func toUpperCase(text: Text) : Text {
+        Text.toUppercase(text)
     };
 
-    public func trim(text: Text) : Text {
+    func trim(text: Text) : Text {
         Text.trim(text, #char ' ')
     };
 
-    public func contains(text: Text, substring: Text) : Bool {
+    func contains(text: Text, substring: Text) : Bool {
         Text.contains(text, #text substring)
     };
 
-    public func startsWith(text: Text, prefix: Text) : Bool {
+    func startsWith(text: Text, prefix: Text) : Bool {
         Text.startsWith(text, #text prefix)
     };
 
-    public func endsWith(text: Text, suffix: Text) : Bool {
+    func endsWith(text: Text, suffix: Text) : Bool {
         Text.endsWith(text, #text suffix)
     };
 
-    public func split(text: Text, delimiter: Char) : [Text] {
+    func split(text: Text, delimiter: Char) : [Text] {
         let parts = Text.split(text, #char delimiter);
         Iter.toArray(parts)
     };
 
-    public func join(texts: [Text], separator: Text) : Text {
+    func join(texts: [Text], separator: Text) : Text {
         Text.join(separator, texts.vals())
     };
 
-    public func isValidEmail(email: Text) : Bool {
+    func isValidEmail(email: Text) : Bool {
         let emailPattern = email;
         contains(emailPattern, "@") and contains(emailPattern, ".")
     };
 
     // Array utilities
-    public func arrayContains<T>(array: [T], item: T, equal: (T, T) -> Bool) : Bool {
+    func arrayContains<T>(array: [T], item: T, equal: (T, T) -> Bool) : Bool {
         switch (Array.find<T>(array, func(x) { equal(x, item) })) {
             case null false;
             case (?_) true;
         };
     };
 
-    public func arrayUnique<T>(array: [T], equal: (T, T) -> Bool) : [T] {
+    func arrayUnique<T>(array: [T], equal: (T, T) -> Bool) : [T] {
         let buffer = Buffer.Buffer<T>(0);
         for (item in array.vals()) {
             if (not arrayContains(Buffer.toArray(buffer), item, equal)) {
@@ -70,43 +74,43 @@ module Utils {
         Buffer.toArray(buffer)
     };
 
-    public func arrayIntersection<T>(array1: [T], array2: [T], equal: (T, T) -> Bool) : [T] {
+    func arrayIntersection<T>(array1: [T], array2: [T], equal: (T, T) -> Bool) : [T] {
         Array.filter<T>(array1, func(item) {
             arrayContains(array2, item, equal)
         })
     };
 
     // Time utilities
-    public func currentTime() : Int {
+    func currentTime() : Int {
         Time.now()
     };
 
-    public func timeToString(timestamp: Int) : Text {
+    func timeToString(timestamp: Int) : Text {
         // Simple timestamp to string conversion
         Int.toText(timestamp)
     };
 
-    public func daysBetween(start: Int, end: Int) : Int {
+    func daysBetween(start: Int, end: Int) : Int {
         let diff = end - start;
         let dayInNanos = 24 * 60 * 60 * 1000000000;
         diff / dayInNanos
     };
 
-    public func addDays(timestamp: Int, days: Int) : Int {
+    func addDays(timestamp: Int, days: Int) : Int {
         let dayInNanos = 24 * 60 * 60 * 1000000000;
         timestamp + (days * dayInNanos)
     };
 
-    public func isExpired(timestamp: Int) : Bool {
+    func isExpired(timestamp: Int) : Bool {
         timestamp < Time.now()
     };
 
     // Random utilities
-    public func generateId(prefix: Text, counter: Nat) : Text {
+    func generateId(prefix: Text, counter: Nat) : Text {
         prefix # "_" # Nat.toText(counter)
     };
 
-    public func generateRandomString(length: Nat, seed: Blob) : Text {
+    func generateRandomString(length: Nat, seed: Blob) : Text {
         let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let charsArray = Text.toArray(chars);
         let buffer = Buffer.Buffer<Char>(length);
@@ -128,7 +132,7 @@ module Utils {
     };
 
     // Validation utilities
-    public func validateRequired(text: Text, fieldName: Text) : Result.Result<(), Text> {
+    func validateRequired(text: Text, fieldName: Text) : Result.Result<(), Text> {
         if (Text.size(text) == 0) {
             #err(fieldName # " is required")
         } else {
@@ -136,7 +140,7 @@ module Utils {
         }
     };
 
-    public func validateLength(text: Text, minLength: Nat, maxLength: Nat, fieldName: Text) : Result.Result<(), Text> {
+    func validateLength(text: Text, minLength: Nat, maxLength: Nat, fieldName: Text) : Result.Result<(), Text> {
         let length = Text.size(text);
         if (length < minLength) {
             #err(fieldName # " must be at least " # Nat.toText(minLength) # " characters")
@@ -147,7 +151,7 @@ module Utils {
         }
     };
 
-    public func validateEmail(email: Text) : Result.Result<(), Text> {
+    func validateEmail(email: Text) : Result.Result<(), Text> {
         if (not isValidEmail(email)) {
             #err("Invalid email format")
         } else {
@@ -155,7 +159,7 @@ module Utils {
         }
     };
 
-    public func validatePositiveNumber(number: Nat, fieldName: Text) : Result.Result<(), Text> {
+    func validatePositiveNumber(number: Nat, fieldName: Text) : Result.Result<(), Text> {
         if (number == 0) {
             #err(fieldName # " must be greater than 0")
         } else {
@@ -163,7 +167,7 @@ module Utils {
         }
     };
 
-    public func validateRange(number: Nat, min: Nat, max: Nat, fieldName: Text) : Result.Result<(), Text> {
+    func validateRange(number: Nat, min: Nat, max: Nat, fieldName: Text) : Result.Result<(), Text> {
         if (number < min or number > max) {
             #err(fieldName # " must be between " # Nat.toText(min) # " and " # Nat.toText(max))
         } else {
@@ -172,24 +176,22 @@ module Utils {
     };
 
     // Principal utilities
-    public func principalToText(p: Principal) : Text {
+    func principalToText(p: Principal) : Text {
         Principal.toText(p)
     };
 
-    public func textToPrincipal(t: Text) : ?Principal {
-        try {
-            ?Principal.fromText(t)
-        } catch (e) {
-            null
+    func textToPrincipal(t: Text) : ?Principal {
+        do ? {
+            Principal.fromText(t)
         }
     };
 
-    public func isAnonymous(p: Principal) : Bool {
+    func isAnonymous(p: Principal) : Bool {
         Principal.isAnonymous(p)
     };
 
     // Pagination utilities
-    public func paginate<T>(items: [T], page: Nat, limit: Nat) : {
+    func paginate<T>(items: [T], page: Nat, limit: Nat) : {
         data: [T];
         total: Nat;
         page: Nat;
@@ -203,7 +205,7 @@ module Utils {
         let paginatedItems = if (start >= total) {
             []
         } else {
-            Array.subArray(items, start, end - start)
+            Array.subArray(items, start, Nat.max(0, end - start))
         };
 
         {
@@ -216,20 +218,20 @@ module Utils {
     };
 
     // Search utilities
-    public func fuzzyMatch(text: Text, query: Text) : Bool {
-        let textLower = toLowerCase(text);
-        let queryLower = toLowerCase(query);
-        contains(textLower, queryLower)
+    func fuzzyMatch(text: Text, Query: Text) : Bool {
+        let textLower = Text.toLowercase(text);
+        let queryLower = Text.toLowercase(Query);
+        Text.contains(textLower, #text queryLower)
     };
 
-    public func calculateSimilarity(text1: Text, text2: Text) : Float {
+    func calculateSimilarity(text1: Text, text2: Text) : Float {
         // Simple similarity calculation based on common characters
-        let chars1 = Text.toArray(toLowerCase(text1));
-        let chars2 = Text.toArray(toLowerCase(text2));
+       let chars1 = Text.toArray(Text.toLowercase(text1));
+       let chars2 = Text.toArray(Text.toLowercase(text2));
         
         var commonChars = 0;
         for (char1 in chars1.vals()) {
-            if (arrayContains(chars2, char1, func(a, b) { a == b })) {
+            if (arrayContains(chars2, char1, func(a: Char, b: Char): Bool { a == b })) {
                 commonChars += 1;
             };
         };
@@ -243,23 +245,23 @@ module Utils {
     };
 
     // Hash utilities
-    public func simpleHash(text: Text) : Nat32 {
+    func simpleHash(text: Text) : Nat32 {
         Text.hash(text)
     };
 
-    public func combineHashes(hash1: Nat32, hash2: Nat32) : Nat32 {
+    func combineHashes(hash1: Nat32, hash2: Nat32) : Nat32 {
         hash1 +% hash2
     };
 
     // Error handling utilities
-    public func mapError<T, E1, E2>(result: Result.Result<T, E1>, mapFn: (E1) -> E2) : Result.Result<T, E2> {
+    func mapError<T, E1, E2>(result: Result.Result<T, E1>, mapFn: (E1) -> E2) : Result.Result<T, E2> {
         switch (result) {
             case (#ok(value)) { #ok(value) };
             case (#err(error)) { #err(mapFn(error)) };
         }
     };
 
-    public func flatMapError<T, E>(result: Result.Result<T, E>) : Result.Result<T, Text> {
+    func flatMapError<T, E>(result: Result.Result<T, E>) : Result.Result<T, Text> {
         switch (result) {
             case (#ok(value)) { #ok(value) };
             case (#err(_)) { #err("Operation failed") };
@@ -267,29 +269,29 @@ module Utils {
     };
 
     // Logging utilities (simplified)
-    public func logInfo(message: Text) {
+    func logInfo(message: Text) {
         // In a real implementation, this would use proper logging
         // For now, we'll use debug print
         Debug.print("[INFO] " # message);
     };
 
-    public func logError(message: Text) {
+    func logError(message: Text) {
         Debug.print("[ERROR] " # message);
     };
 
-    public func logWarning(message: Text) {
+    func logWarning(message: Text) {
         Debug.print("[WARNING] " # message);
     };
 
     // Data transformation utilities
-    public func optionToResult<T>(option: ?T, errorMessage: Text) : Result.Result<T, Text> {
+    func optionToResult<T>(option: ?T, errorMessage: Text) : Result.Result<T, Text> {
         switch (option) {
             case (?value) { #ok(value) };
             case null { #err(errorMessage) };
         }
     };
 
-    public func resultToOption<T, E>(result: Result.Result<T, E>) : ?T {
+    func resultToOption<T, E>(result: Result.Result<T, E>) : ?T {
         switch (result) {
             case (#ok(value)) { ?value };
             case (#err(_)) { null };
@@ -297,40 +299,41 @@ module Utils {
     };
 
     // File utilities
-    public func getFileExtension(filename: Text) : Text {
-        let parts = split(filename, '.');
-        if (parts.size() > 1) {
-            parts[parts.size() - 1]
-        } else {
-            ""
-        }
-    };
+   func getFileExtension(filename: Text) : Text {
+    let partsIter = Text.split(filename, #char '.');
+    let parts = Iter.toArray(partsIter);
+    if (parts.size() > 1) {
+        parts[parts.size() - 1]
+    } else {
+        ""
+    }
+};
 
-    public func isValidFileType(filename: Text, allowedTypes: [Text]) : Bool {
-        let extension = toLowerCase(getFileExtension(filename));
-        arrayContains(allowedTypes, extension, Text.equal)
+    func isValidFileType(filename: Text, allowedTypes: [Text]) : Bool {
+        let extension = Text.toLowercase(getFileExtension(filename));
+        Array.find<Text>(allowedTypes, func x = Text.equal(x, extension)) != null
     };
 
     // URL utilities
-    public func buildIPFSUrl(hash: Text) : Text {
+    func buildIPFSUrl(hash: Text) : Text {
         "ipfs://" # hash
     };
 
-    public func extractIPFSHash(url: Text) : ?Text {
-        if (startsWith(url, "ipfs://")) {
-            let hash = Text.trimStart(url, #text "ipfs://");
-            if (Text.size(hash) > 0) {
-                ?hash
-            } else {
-                null
-            }
+    func extractIPFSHash(url: Text) : ?Text {
+    if (Text.startsWith(url, #text "ipfs://")) {
+        let hash = Text.trimStart(url, #text "ipfs://");
+        if (Text.size(hash) > 0) {
+            ?hash
         } else {
             null
         }
-    };
+    } else {
+        null
+    }
+};
 
     // Math utilities
-    public func percentage(part: Nat, whole: Nat) : Float {
+    func percentage(part: Nat, whole: Nat) : Float {
         if (whole == 0) {
             0.0
         } else {
@@ -338,7 +341,7 @@ module Utils {
         }
     };
 
-    public func average(numbers: [Nat]) : Float {
+    func average(numbers: [Nat]) : Float {
         if (numbers.size() == 0) {
             0.0
         } else {
@@ -347,7 +350,7 @@ module Utils {
         }
     };
 
-    public func median(numbers: [Nat]) : Float {
+    func median(numbers: [Nat]) : Float {
         if (numbers.size() == 0) {
             0.0
         } else {
@@ -360,4 +363,3 @@ module Utils {
             }
         }
     };
-}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Download, ExternalLink, Award, Calendar, Users, Tag } from 'lucide-react';
+import { Search, Filter, Download, ExternalLink, Award, Calendar, Users, Tag, FileText } from 'lucide-react';
 import { mockPapers, Paper } from '../../data/mockData';
 
 const PaperLibrary: React.FC = () => {

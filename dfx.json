@@ -7,15 +7,15 @@
     },
     "daoSystem": {
       "type": "motoko", 
-      "main": "src/daoSystem/main.mo"
+      "main": "src/daoSystem/Main.mo"
     },
     "aiChatbot": {
       "type": "motoko",
       "main": "src/aiChatbot/main.mo"
     },
-    "deresnet_frontend": {
+    "deresnet-frontend": {
       "type": "assets",
-      "source": ["dist/"]
+      "source": ["./Frontend/dist"]
     }
   },
   "networks": {

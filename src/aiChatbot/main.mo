@@ -3,15 +3,15 @@ import Array "mo:base/Array";
 import Time "mo:base/Time";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
-import Option "mo:base/Option";
+
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Buffer "mo:base/Buffer";
-import Debug "mo:base/Debug";
-import Random "mo:base/Random";
+
+import Prim "mo:prim";
 
 import Types "../shared/Types";
 
@@ -227,7 +227,7 @@ actor AIChatbot {
         };
     };
 
-    private func generateTrendsResponse(entities: [Text]) : Text {
+    private func generateTrendsResponse(_: [Text]) : Text {
         "**Current Research Trends in DeResNet:**\n\n" #
         "🔥 **Hot Topics:**\n" #
         "• Quantum-classical hybrid algorithms\n" #
@@ -375,7 +375,7 @@ actor AIChatbot {
         #ok(summary)
     };
 
-    private func generatePaperSummary(paperId: Text, content: Text) : Text {
+    private func generatePaperSummary(paperId: Text, _: Text) : Text {
         // Simplified paper summarization
         "**Paper Summary for " # paperId # ":**\n\n" #
         "This research paper presents novel contributions to its field through innovative methodologies and comprehensive analysis. " #
@@ -392,7 +392,7 @@ actor AIChatbot {
         "This work has the potential to influence future research directions and practical applications in the field."
     };
 
-    private func extractPaperKeywords(content: Text) : [Text] {
+    private func extractPaperKeywords(_: Text) : [Text] {
         // Simplified keyword extraction
         ["research", "methodology", "analysis", "results", "conclusions", "innovation"]
     };

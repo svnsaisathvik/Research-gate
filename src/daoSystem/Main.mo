@@ -3,14 +3,13 @@ import Array "mo:base/Array";
 import Time "mo:base/Time";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
-import Option "mo:base/Option";
+
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Nat "mo:base/Nat";
-import Buffer "mo:base/Buffer";
-import Debug "mo:base/Debug";
+
 
 import Types "../shared/Types";
 
@@ -42,8 +41,8 @@ actor DAOSystem {
 
     // Constants
     private let INITIAL_TOKEN_AMOUNT : Nat = 1000;
-    private let MIN_PROPOSAL_TOKENS : Nat = 100;
-    private let PROPOSAL_DURATION_DAYS : Int = 7 * 24 * 60 * 60 * 1000000000; // 7 days in nanoseconds
+    private let _MIN_PROPOSAL_TOKENS : Nat = 100;
+    private let _PROPOSAL_DURATION_DAYS : Int = 7 * 24 * 60 * 60 * 1000000000; // 7 days in nanoseconds
     private let QUORUM_PERCENTAGE : Float = 0.1; // 10% of token holders must participate
 
     // Initialize from stable storage
@@ -165,7 +164,7 @@ actor DAOSystem {
         }
     };
 
-    public shared query(msg) func getTokenBalance() : async Nat {
+    public shared query(msg) func getMyTokenBalance() : async Nat {
         getTokenBalance(msg.caller)
     };
 
@@ -247,7 +246,7 @@ actor DAOSystem {
         let end = Int.min(start + pagination.limit, total);
         
         let paginatedProposals = if (start >= total) { [] } else {
-            Array.subArray(sortedProposals, start, end - start)
+            Array.subArray(sortedProposals, start, Int.abs(end - start))
         };
 
         {
@@ -281,7 +280,7 @@ actor DAOSystem {
         let end = Int.min(start + pagination.limit, total);
         
         let paginatedProposals = if (start >= total) { [] } else {
-            Array.subArray(sortedProposals, start, end - start)
+            Array.subArray(sortedProposals, start, Int.abs(end - start))
         };
 
         {
@@ -356,7 +355,7 @@ actor DAOSystem {
     };
 
     // Execution
-    public shared(msg) func executeProposal(proposalId: Text) : async Result<(), Error> {
+    public shared(_) func executeProposal(proposalId: Text) : async Result<(), Error> {
         switch (proposals.get(proposalId)) {
             case null { #err(#NotFound) };
             case (?proposal) {
@@ -427,7 +426,7 @@ actor DAOSystem {
         let end = Int.min(start + pagination.limit, total);
         
         let paginatedTransactions = if (start >= total) { [] } else {
-            Array.subArray(sortedTransactions, start, end - start)
+            Array.subArray(sortedTransactions, start, Int.abs(end - start))
         };
 
         {
@@ -455,7 +454,7 @@ actor DAOSystem {
         let end = Int.min(start + pagination.limit, total);
         
         let paginatedTransactions = if (start >= total) { [] } else {
-            Array.subArray(sortedTransactions, start, end - start)
+            Array.subArray(sortedTransactions, start, Int.abs(end - start))
         };
 
         {

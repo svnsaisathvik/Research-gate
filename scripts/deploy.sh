@@ -147,7 +147,7 @@ print_success "aiChatbot deployed: $AI_CANISTER_ID"
 if [[ "$SKIP_FRONTEND" == false ]]; then
     print_status "Building frontend..."
     cd deresnet-frontend
-    npm run build
+    
     cd ..
     
     print_status "Deploying frontend..."

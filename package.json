@@ -9,19 +9,19 @@
     "deploy:local": "dfx deploy --network local",
     "deploy:ic": "dfx deploy --network ic",
     "build": "npm run build:frontend && npm run build:backend",
-    "build:frontend": "cd deresnet-frontend && npm run build",
+    "build:frontend": "cd Frontend && npm run build",
     "build:backend": "dfx build",
     "test": "npm run test:backend && npm run test:frontend",
     "test:backend": "dfx test",
-    "test:frontend": "cd deresnet-frontend && npm test",
+    "test:frontend": "cd Frontend && npm test",
     "stop": "dfx stop",
     "clean": "dfx stop && rm -rf .dfx",
     "generate": "dfx generate",
     "setup": "npm run setup:deps && npm run setup:identity",
-    "setup:deps": "npm install && cd deresnet-frontend && npm install",
+    "setup:deps": "npm install && cd Frontend && npm install",
     "setup:identity": "dfx identity new deresnet-dev || true && dfx identity use deresnet-dev",
     "canister:paperStorage": "dfx canister call paperStorage",
-    "canister:daoSystem": "dfx canister call daoSystem", 
+    "canister:daoSystem": "dfx canister call daoSystem",
     "canister:aiChatbot": "dfx canister call aiChatbot",
     "dev": "npm run start && npm run deploy:local"
   },
@@ -37,12 +37,11 @@
   "author": "DeResNet Team",
   "license": "MIT",
   "devDependencies": {
+    "@dfinity/agent": "^0.21.4",
+    "@dfinity/auth-client": "^0.21.0",
     "@dfinity/candid": "^0.21.0",
-    "@dfinity/agent": "^0.21.0",
-    "@dfinity/principal": "^0.21.0",
-    "@dfinity/auth-client": "^0.21.0"
+    "@dfinity/principal": "^0.21.0"
   },
-  "dependencies": {},
   "engines": {
     "node": ">=16.0.0"
   },

@@ -47,7 +47,7 @@ build: ## Build all canisters
 
 build-frontend: ## Build frontend only
 	@echo "🔨 Building frontend..."
-	cd deresnet-frontend && npm run build
+	cd Frontend && npm run build
 
 # Deployment Commands
 deploy: build ## Deploy all canisters to local network
@@ -81,7 +81,7 @@ test-backend: ## Run backend tests only
 
 test-frontend: ## Run frontend tests only
 	@echo "🧪 Running frontend tests..."
-	cd deresnet-frontend && npm test
+	cd  && npm test
 
 test-e2e: ## Run end-to-end tests
 	@echo "🧪 Running E2E tests..."

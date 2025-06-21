@@ -1,4 +1,4 @@
-import { Actor, HttpAgent, Identity } from '@dfinity/agent';
+import { Actor, HttpAgent, Identity, AnonymousIdentity } from '@dfinity/agent';
 import { AuthClient } from '@dfinity/auth-client';
 import { Principal } from '@dfinity/principal';
 
@@ -7,15 +7,16 @@ import { Principal } from '@dfinity/principal';
 import { 
     paperStorage,
     createActor as createPaperStorageActor,
-} from '../declarations/paperStorage';
+} from '../src/declarations/paperStorage';
 import { 
     daoSystem,
     createActor as createDAOSystemActor,
-} from '../declarations/daoSystem';
+} from '../src/declarations/daoSystem';
 import { 
     aiChatbot,
     createActor as createAIChatbotActor,
-} from '../declarations/aiChatbot';
+} from '../src/declarations/aiChatbot';
+import React from 'react';
 
 // Types
 export interface CanisterActors {
@@ -32,15 +33,32 @@ export interface DeResNetAPI {
     isAuthenticated: boolean;
 }
 
+// Extend ImportMeta to include 'env' for Vite compatibility
+interface ImportMetaEnv {
+    readonly MODE: string;
+    readonly VITE_CANISTER_ID_PAPERSTORAGE?: string;
+    readonly VITE_CANISTER_ID_DAOSYSTEM?: string;
+    readonly VITE_CANISTER_ID_AICHATBOT?: string;
+    // add other env variables as needed
+}
+
+// Add this declaration globally so TypeScript recognizes import.meta.env
+declare global {
+    interface ImportMeta {
+        readonly env: ImportMetaEnv;
+    }
+}
+
 // Configuration
-const isDevelopment = process.env.NODE_ENV === 'development';
+// Use environment variables compatible with your frontend build tool (e.g., import.meta.env for Vite, process.env.REACT_APP_* for CRA)
+const isDevelopment = import.meta.env.MODE === 'development';
 const host = isDevelopment ? 'http://localhost:4943' : 'https://ic0.app';
 
 // Canister IDs - these would be set by environment variables in production
 const CANISTER_IDS = {
-    paperStorage: process.env.CANISTER_ID_PAPERSTORAGE || 'rdmx6-jaaaa-aaaaa-aaadq-cai',
-    daoSystem: process.env.CANISTER_ID_DAOSYSTEM || 'rrkah-fqaaa-aaaaa-aaaaq-cai',
-    aiChatbot: process.env.CANISTER_ID_AICHATBOT || 'rno2w-sqaaa-aaaaa-aaacq-cai',
+    paperStorage:  'umunu-kh777-77774-qaaca-cai',
+    daoSystem:  'u6s2n-gx777-77774-qaaba-cai',
+    aiChatbot:  'uxrrr-q7777-77774-qaaaq-cai',
 };
 
 class DeResNetService {
@@ -62,10 +80,11 @@ class DeResNetService {
         }
 
         // Create HTTP agent
-        this.agent = new HttpAgent({
-            host,
-            identity: this.identity,
-        });
+        this.agent = new HttpAgent(
+            this.identity
+                ? { host, identity: this.identity }
+                : { host }
+        );
 
         // In development, fetch root key
         if (isDevelopment) {
@@ -102,7 +121,7 @@ class DeResNetService {
         return new Promise((resolve) => {
             this.authClient!.login({
                 identityProvider: isDevelopment 
-                    ? `http://localhost:4943/?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}`
+                    ? `http://localhost:4943/?canisterId=uzt4z-lp777-77774-qaabq-cai`
                     : 'https://identity.ic0.app',
                 onSuccess: async () => {
                     this.isAuthenticated = true;
@@ -136,7 +155,7 @@ class DeResNetService {
 
         // Update agent to anonymous identity
         if (this.agent) {
-            this.agent.replaceIdentity(null);
+            this.agent.replaceIdentity(new AnonymousIdentity());
         }
 
         // Recreate actors with anonymous agent
@@ -270,7 +289,7 @@ export class PaperStorageAPI {
     }
 
     async getAllPapers(page: number = 0, limit: number = 10) {
-        return this.actors.paperStorage.getAllPapers({ page, limit });
+        return this.actors.paperStorage.getAllPapers({ page: BigInt(page), limit: BigInt(limit) });
     }
 
     async searchPapers(
@@ -293,10 +312,12 @@ export class PaperStorageAPI {
             institution: query.institution ? [query.institution] : [],
             dateFrom: query.dateFrom ? [DeResNetUtils.timestampToNanos(query.dateFrom)] : [],
             dateTo: query.dateTo ? [DeResNetUtils.timestampToNanos(query.dateTo)] : [],
-            status: query.status ? [{ [query.status]: null }] : [],
+            status: query.status
+                ? ([{ [query.status]: null }] as [any])
+                : ([] as []),
         };
 
-        return this.actors.paperStorage.searchPapers(searchQuery, { page, limit });
+        return ;
     }
 
     async getPaper(paperId: string) {
@@ -307,7 +328,7 @@ export class PaperStorageAPI {
 
     async submitReview(paperId: string, score: number, comments: string, isPublic: boolean) {
         return DeResNetUtils.handleResult(() =>
-            this.actors.paperStorage.submitReview(paperId, score, comments, isPublic)
+            this.actors.paperStorage.submitReview(paperId, BigInt(score), comments, isPublic)
         );
     }
 
@@ -326,11 +347,11 @@ export class PaperStorageAPI {
     }
 
     async getTrendingPapers(limit: number = 10) {
-        return this.actors.paperStorage.getTrendingPapers(limit);
+        return this.actors.paperStorage.getTrendingPapers(BigInt(limit));
     }
 
     async getPopularTags(limit: number = 20) {
-        return this.actors.paperStorage.getPopularTags(limit);
+        return this.actors.paperStorage.getPopularTags(BigInt(limit));
     }
 }
 
@@ -345,7 +366,7 @@ export class DAOSystemAPI {
     }
 
     async getTokenBalance() {
-        return this.actors.daoSystem.getTokenBalance();
+        return this.actors.daoSystem.getMyTokenBalance();
     }
 
     async transferTokens(to: Principal, amount: bigint) {
@@ -367,8 +388,13 @@ export class DAOSystemAPI {
             this.actors.daoSystem.createProposal({
                 title: submission.title,
                 description: submission.description,
-                proposalType: { [submission.proposalType]: null },
-                requiredTokens: submission.requiredTokens,
+                proposalType: 
+                    submission.proposalType === 'grant'
+                        ? { grant: null }
+                        : submission.proposalType === 'review'
+                        ? { review: null }
+                        : { governance: null },
+                requiredTokens: BigInt(submission.requiredTokens),
                 duration: durationNanos,
             })
         );
@@ -381,7 +407,7 @@ export class DAOSystemAPI {
     }
 
     async getAllProposals(page: number = 0, limit: number = 10) {
-        return this.actors.daoSystem.getAllProposals({ page, limit });
+        return this.actors.daoSystem.getAllProposals({ page: BigInt(page), limit: BigInt(limit) });
     }
 
     async getProposalsByStatus(
@@ -389,9 +415,15 @@ export class DAOSystemAPI {
         page: number = 0,
         limit: number = 10
     ) {
+        const statusMap: Record<'active' | 'passed' | 'rejected' | 'executed', { active: null } | { passed: null } | { rejected: null } | { executed: null }> = {
+            active: { active: null },
+            passed: { passed: null },
+            rejected: { rejected: null },
+            executed: { executed: null },
+        };
         return this.actors.daoSystem.getProposalsByStatus(
-            { [status]: null },
-            { page, limit }
+            statusMap[status],
+            { page: BigInt(page), limit: BigInt(limit) }
         );
     }
 
@@ -420,11 +452,11 @@ export class DAOSystemAPI {
     }
 
     async getTransactionHistory(page: number = 0, limit: number = 10) {
-        return this.actors.daoSystem.getTransactionHistory({ page, limit });
+        return this.actors.daoSystem.getTransactionHistory({ page: BigInt(page), limit: BigInt(limit) });
     }
 
     async getUserTransactions(page: number = 0, limit: number = 10) {
-        return this.actors.daoSystem.getUserTransactions({ page, limit });
+        return this.actors.daoSystem.getUserTransactions({ page: BigInt(page), limit: BigInt(limit) });
     }
 }
 
