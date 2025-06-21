@@ -14,8 +14,10 @@
       "main": "src/aiChatbot/main.mo"
     },
     "deresnet-frontend": {
+
       "type": "assets",
-      "source": ["./Frontend/dist"]
+      "source": ["Frontend/dist"],
+      "build": ["cd Frontend && npm run build"]
     }
   },
   "networks": {

@@ -146,7 +146,7 @@ print_success "aiChatbot deployed: $AI_CANISTER_ID"
 # Deploy frontend if not skipped
 if [[ "$SKIP_FRONTEND" == false ]]; then
     print_status "Building frontend..."
-    cd deresnet-frontend
+    cd Frontend
     
     cd ..
     
