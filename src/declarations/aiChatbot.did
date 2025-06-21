@@ -1,0 +1,94 @@
+type Error = variant {
+    NotFound;
+    Unauthorized;
+    InvalidInput : text;
+    InsufficientTokens;
+    AlreadyExists;
+    NotImplemented;
+};
+
+type MessageType = variant {
+    user;
+    ai;
+};
+
+type ChatMessage = record {
+    id : text;
+    messageType : MessageType;
+    content : text;
+    timestamp : int;
+    userId : principal;
+    paperRef : opt text;
+};
+
+type ChatSession = record {
+    id : text;
+    userId : principal;
+    messages : vec ChatMessage;
+    createdAt : int;
+    lastActivity : int;
+};
+
+type Result = variant {
+    ok : text;
+    err : Error;
+};
+
+type ResultSession = variant {
+    ok : ChatSession;
+    err : Error;
+};
+
+type ResultMessage = variant {
+    ok : ChatMessage;
+    err : Error;
+};
+
+type ResultKeywords = variant {
+    ok : vec text;
+    err : Error;
+};
+
+type ResultSimilarPapers = variant {
+    ok : vec text;
+    err : Error;
+};
+
+type ResultUnit = variant {
+    ok : null;
+    err : Error;
+};
+
+service : {
+    // Session management
+    createChatSession : () -> (Result);
+    getChatSession : (text) -> (ResultSession) query;
+    getUserSessions : () -> (vec ChatSession) query;
+
+    // Message handling
+    sendMessage : (text, text, opt text) -> (ResultMessage);
+
+    // Paper analysis
+    analyzePaper : (text, text) -> (Result);
+    getPaperSummary : (text) -> (Result) query;
+    getPaperKeywords : (text) -> (ResultKeywords) query;
+
+    // Similar papers recommendation
+    findSimilarPapers : (text) -> (ResultSimilarPapers);
+    getSimilarPapers : (text) -> (ResultSimilarPapers) query;
+
+    // Research insights
+    getResearchInsights : (text) -> (text) query;
+
+    // Statistics
+    getChatStats : () -> (record {
+        totalSessions : nat;
+        totalMessages : nat;
+        averageMessagesPerSession : float64;
+        papersAnalyzed : nat;
+    }) query;
+
+    // Utility functions
+    deleteChatSession : (text) -> (ResultUnit);
+    clearOldSessions : (int) -> (nat);
+}
